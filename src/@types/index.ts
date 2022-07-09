@@ -1,0 +1,21 @@
+enum Events {
+	ERROR = "ERROR",
+	CREATE_ROOM = "CREATE_ROOM",
+	USER_EXISTS = "USER_EXISTS",
+	UPDATE_ROOMS = "UPDATE_ROOMS",
+	JOIN_ROOM = "JOIN_ROOM",
+	GET_ALL_ROOMS = "GET_ALL_ROOMS",
+	REMOVE_ROOM = "REMOVE_ROOM",
+	LEAVE_ROOM = "LEAVE_ROOM",
+	USER_READY = "USER_READY",
+	START_GAME = "START_GAME",
+	CHANGE_PROGRESS = "CHANGE_PROGRESS",
+}
+
+interface User {
+	username: string;
+	isReady: boolean;
+	progress: number;
+}
+
+export { Events, User };
