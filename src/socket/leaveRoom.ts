@@ -1,31 +1,40 @@
 import { Server, Socket } from "socket.io";
 import { Events, User } from "../@types";
+import { roomProgress, startedGameRooms, users } from "../state";
+import getRoomUsers from "../helpers/getRoomUsers";
+import shouldEndGameWhenLeave from "../helpers/shouldEndGameWhenLeave";
 import shouldShowRoom from "../helpers/shouldShowRoom";
+import endGame from "./endGame";
 
 function leaveRoom(
 	io: Server,
 	socket: Socket,
 	room: string,
-	rooms: string[],
-	users: Map<string, User>
+	rooms: string[]
 ): string[] {
 	socket.leave(room);
-	shouldShowRoom(io, room, users) &&
+	roomProgress[room]?.delete(socket.id);
+	shouldShowRoom(io, room) &&
 		io.emit(Events.UPDATE_ROOMS, {
 			name: room,
-			numberOfUsers: io.sockets.adapter.rooms.get(room)?.size || 0,
+			numberOfUsers: getRoomUsers(io, room)?.size || 0,
 		});
 	users.set(socket.id, { ...users.get(socket.id), isReady: false } as User);
-	if (!io.sockets.adapter.rooms.get(room)?.size) {
+	if (!getRoomUsers(io, room)?.size) {
 		io.sockets.adapter.rooms.delete(room);
 		io.emit(Events.REMOVE_ROOM, {
 			name: room,
 		});
+		startedGameRooms.delete(room);
 		return rooms.filter((r) => r !== room);
 	}
 	io.to(room).emit(Events.LEAVE_ROOM, {
 		...users.get(socket.id),
 	});
+	if (shouldEndGameWhenLeave(io, room)) {
+		const roomUsers = getRoomUsers(io, room);
+		endGame(io, socket, true, room, roomUsers);
+	}
 	return rooms;
 }
 

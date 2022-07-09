@@ -34,15 +34,20 @@ const showResultsModal = ({ usersSortedArray, onClose = () => {} }) => {
 
 	const modalElement = createModalElement("Results: ");
 
-	const resultElements = usersSortedArray.map((username, index) => {
+	const resultElements = usersSortedArray.map((data, index) => {
 		const place = ++index;
+		if (data) {
+			const { username, accuracy, wpm } = data;
 
-		return createElement({
-			tagName: "div",
-			className: "user-result",
-			attributes: { "data-username": username, "data-place": place },
-			innerElements: [`${place}) ${username}`],
-		});
+			return createElement({
+				tagName: "div",
+				className: "user-result",
+				attributes: { "data-username": username, "data-place": place },
+				innerElements: [
+					`${place}) ${username}. Accuracy - ${accuracy}%. Speed - ${wpm} WPM.`,
+				],
+			});
+		}
 	});
 
 	const bodyWrapper = createElement({

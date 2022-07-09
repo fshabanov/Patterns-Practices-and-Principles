@@ -10,12 +10,20 @@ enum Events {
 	USER_READY = "USER_READY",
 	START_GAME = "START_GAME",
 	CHANGE_PROGRESS = "CHANGE_PROGRESS",
+	END_GAME = "END_GAME",
 }
 
 interface User {
 	username: string;
 	isReady: boolean;
 	progress: number;
+	accuracy: number;
+	wpm: number;
+	socketId: string;
 }
 
-export { Events, User };
+interface IRoomProgress {
+	[key: string]: Set<string>;
+}
+
+export { Events, User, IRoomProgress };

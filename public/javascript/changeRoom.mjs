@@ -1,5 +1,6 @@
 import { appendUserElement } from "./views/user.mjs";
 
+const readyButton = document.getElementById("ready-btn");
 let isReady = false;
 
 function showRoom(socket, roomName, users, newUser) {
@@ -10,7 +11,6 @@ function showRoom(socket, roomName, users, newUser) {
 	const button = document.getElementById("quit-room-btn");
 	button.onclick = () => leaveRoom(socket, roomName);
 
-	const readyButton = document.getElementById("ready-btn");
 	readyButton.onclick = () => {
 		socket.emit("USER_READY", { isReady: !isReady, roomName });
 		readyButton.innerText = isReady ? "READY" : "NOT READY";
@@ -39,7 +39,16 @@ function leaveRoom(socket, roomName) {
 	rooms.classList.remove("display-none");
 	const users = document.getElementById("users-wrapper");
 	users.innerHTML = "";
+	isReady = false;
+	readyButton.innerText = "READY";
+	socket.emit("USER_READY", { isReady: false, roomName });
+
 	socket.emit("LEAVE_ROOM", roomName);
 }
 
+function setIsReady(newValue) {
+	isReady = newValue;
+}
+
 export default showRoom;
+export { setIsReady };

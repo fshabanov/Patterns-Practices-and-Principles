@@ -11,7 +11,7 @@ import {
 	removeUserElement,
 	setProgress,
 } from "./views/user.mjs";
-import startGameTimer from "./startGame.mjs";
+import startGameTimer, { endGame } from "./startGame.mjs";
 
 const username = sessionStorage.getItem("username");
 
@@ -72,12 +72,16 @@ socket.on("USER_READY", ({ username, isReady }) => {
 	changeReadyStatus({ username, ready: isReady });
 });
 
-socket.on("START_GAME", ({ timer, duration, textIdx, roomName }) => {
-	startGameTimer(timer, duration, textIdx, roomName);
+socket.on("START_GAME", ({ timer, duration, textIdx }) => {
+	startGameTimer(timer, duration, textIdx);
 });
 
 socket.on("CHANGE_PROGRESS", ({ username, progress }) => {
 	setProgress({ username, progress });
+});
+
+socket.on("END_GAME", ({ userOrder }) => {
+	endGame(userOrder);
 });
 
 export default socket;

@@ -1,12 +1,8 @@
 import { Server, Socket } from "socket.io";
-import { Events, User } from "../@types";
+import { Events } from "../@types";
+import { users } from "../state";
 
-function joinRoom(
-	io: Server,
-	socket: Socket,
-	roomName: string,
-	users: Map<string, User>
-) {
+function joinRoom(io: Server, socket: Socket, roomName: string) {
 	io.to(roomName).emit(Events.JOIN_ROOM, {
 		name: roomName,
 		users: Array.from(
