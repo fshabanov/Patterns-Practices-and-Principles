@@ -1,4 +1,4 @@
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import { users } from "../state";
 import getRoomUsers from "./getRoomUsers";
 

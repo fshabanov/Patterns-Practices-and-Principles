@@ -11,7 +11,8 @@ import {
 	removeUserElement,
 	setProgress,
 } from "./views/user.mjs";
-import startGameTimer, { endGame } from "./startGame.mjs";
+import startGameTimer from "./game/startTimer.mjs";
+import endGame from "./game/endGame.mjs";
 
 const username = sessionStorage.getItem("username");
 

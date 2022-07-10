@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { Events, User } from "../@types";
-import { roomProgress, users } from "../state";
+import { roomProgress, setRooms, users } from "../state";
 import getRoomName from "../helpers/getRoomName";
 import getRoomUsers from "../helpers/getRoomUsers";
 import * as config from "./config";
@@ -11,32 +11,17 @@ import joinRoom from "./joinRoom";
 import leaveRoom from "./leaveRoom";
 import startTimer from "./startTimer";
 import userReady from "./userReady";
-
-let rooms: string[] = [];
+import connectUser from "./connectUser";
 
 export default (io: Server) => {
 	io.on("connection", (socket) => {
 		const username = socket.handshake.query.username as string;
-		if (io.sockets.sockets.has(username)) {
-			socket.emit(Events.USER_EXISTS, { message: "Username already exists" });
-			socket.disconnect();
-			return;
-		}
-		io.sockets.sockets.set(username, socket);
-		users.set(socket.id, {
-			username,
-			isReady: false,
-			progress: 0,
-			accuracy: 0,
-			wpm: 0,
-			socketId: socket.id,
-		});
 
-		console.log(`${username} connected`);
+		connectUser(io, socket, username);
 
-		getAllRooms(io, socket, rooms);
+		getAllRooms(io, socket);
 
-		createRoom(io, socket, rooms);
+		createRoom(io, socket);
 
 		socket.on(Events.JOIN_ROOM, (roomName) => {
 			if (getRoomUsers(io, roomName)?.has(socket.id)) return;
@@ -58,7 +43,7 @@ export default (io: Server) => {
 		});
 
 		socket.on(Events.LEAVE_ROOM, (roomName) => {
-			rooms = leaveRoom(io, socket, roomName, rooms);
+			setRooms(leaveRoom(io, socket, roomName));
 			startTimer(io, roomName);
 		});
 
@@ -89,6 +74,7 @@ export default (io: Server) => {
 				...users.get(socket.id),
 			});
 			const roomUsers = getRoomUsers(io, roomName);
+			// If all users are finished, end the game
 			if (roomProgress[roomName].size === roomUsers?.size) {
 				endGame(io, socket, true);
 			}
@@ -101,7 +87,7 @@ export default (io: Server) => {
 		socket.on("disconnecting", () => {
 			const connectedRooms = Array.from(socket.rooms).slice(1);
 			connectedRooms.forEach((room) => {
-				rooms = leaveRoom(io, socket, room, rooms);
+				setRooms(leaveRoom(io, socket, room));
 				startTimer(io, room);
 			});
 			users.delete(socket.id);

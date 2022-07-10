@@ -10,13 +10,10 @@ function endGame(
 	io: Server,
 	socket: Socket,
 	sendAll = false,
-	customRoomName?: string,
-	customRoomUsers?: Set<string>
+	customRoomName?: string
 ): void {
 	const roomName = customRoomName ? customRoomName : getRoomName(socket);
-	const roomUsers = customRoomUsers
-		? customRoomUsers
-		: getRoomUsers(io, roomName);
+	const roomUsers = getRoomUsers(io, roomName);
 	if (roomUsers) {
 		const toAdd: User[] = [];
 		roomUsers.forEach((user) => {
@@ -25,7 +22,11 @@ function endGame(
 				toAdd.push(userInfo as User);
 			}
 		});
-		toAdd.sort((a, b) => b.progress - a.progress);
+		toAdd.sort((a, b) => {
+			return b.progress - a.progress === 0
+				? b.accuracy - a.accuracy
+				: b.progress - a.progress;
+		});
 		let userOrder = Array.from(roomProgress[roomName])
 			.map((socketId) => users.get(socketId))
 			.concat(toAdd);
@@ -60,13 +61,11 @@ function endGame(
 		});
 	});
 
-	if (roomUsers && roomUsers?.size < 5) {
-		shouldShowRoom(io, roomName) &&
-			io.emit(Events.CREATE_ROOM, {
-				name: roomName,
-				numberOfUsers: getRoomUsers(io, roomName)?.size || 0,
-			});
-	}
+	shouldShowRoom(io, roomName) &&
+		io.emit(Events.CREATE_ROOM, {
+			name: roomName,
+			numberOfUsers: getRoomUsers(io, roomName)?.size || 0,
+		});
 }
 
 export default endGame;

@@ -1,17 +1,12 @@
 import { Server, Socket } from "socket.io";
 import { Events, User } from "../@types";
-import { roomProgress, startedGameRooms, users } from "../state";
+import { roomProgress, rooms, startedGameRooms, users } from "../state";
 import getRoomUsers from "../helpers/getRoomUsers";
 import shouldEndGameWhenLeave from "../helpers/shouldEndGameWhenLeave";
 import shouldShowRoom from "../helpers/shouldShowRoom";
 import endGame from "./endGame";
 
-function leaveRoom(
-	io: Server,
-	socket: Socket,
-	room: string,
-	rooms: string[]
-): string[] {
+function leaveRoom(io: Server, socket: Socket, room: string): string[] {
 	socket.leave(room);
 	roomProgress[room]?.delete(socket.id);
 	shouldShowRoom(io, room) &&
@@ -32,8 +27,7 @@ function leaveRoom(
 		...users.get(socket.id),
 	});
 	if (shouldEndGameWhenLeave(io, room)) {
-		const roomUsers = getRoomUsers(io, room);
-		endGame(io, socket, true, room, roomUsers);
+		endGame(io, socket, true, room);
 	}
 	return rooms;
 }

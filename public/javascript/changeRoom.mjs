@@ -1,3 +1,4 @@
+import socket from "./game.mjs";
 import { appendUserElement } from "./views/user.mjs";
 
 const readyButton = document.getElementById("ready-btn");
@@ -9,12 +10,12 @@ function showRoom(socket, roomName, users, newUser) {
 	const room = document.getElementById("game-page");
 	room.classList.remove("display-none");
 	const button = document.getElementById("quit-room-btn");
-	button.onclick = () => leaveRoom(socket, roomName);
+	button.onclick = () => leaveRoom(roomName);
 
 	readyButton.onclick = () => {
-		socket.emit("USER_READY", { isReady: !isReady, roomName });
 		readyButton.innerText = isReady ? "READY" : "NOT READY";
 		isReady = !isReady;
+		socket.emit("USER_READY", { isReady, roomName });
 	};
 
 	const header = document.getElementById("room-name");
@@ -32,7 +33,7 @@ function showRoom(socket, roomName, users, newUser) {
 	}
 }
 
-function leaveRoom(socket, roomName) {
+function leaveRoom(roomName) {
 	const room = document.getElementById("game-page");
 	room.classList.add("display-none");
 	const rooms = document.getElementById("rooms-page");

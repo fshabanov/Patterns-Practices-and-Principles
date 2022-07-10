@@ -6,4 +6,10 @@ const startedGameRooms = new Set<string>();
 
 const users = new Map<string, User>();
 
-export { roomProgress, startedGameRooms, users };
+let rooms: string[] = [];
+
+function setRooms(newRooms: string[]): void {
+	rooms = newRooms;
+}
+
+export { roomProgress, startedGameRooms, users, rooms, setRooms };

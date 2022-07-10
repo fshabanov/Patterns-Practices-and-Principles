@@ -1,9 +1,10 @@
 import { Server, Socket } from "socket.io";
-import { Events, User } from "../@types";
+import { Events } from "../@types";
 import getRoomUsers from "../helpers/getRoomUsers";
+import { rooms } from "../state";
 import joinRoom from "./joinRoom";
 
-function createRoom(io: Server, socket: Socket, rooms: string[]): void {
+function createRoom(io: Server, socket: Socket): void {
 	socket.on(Events.CREATE_ROOM, (roomName: string) => {
 		if (io.sockets.adapter.rooms.has(roomName)) {
 			socket.emit(Events.ERROR, {
