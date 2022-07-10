@@ -54,31 +54,32 @@ export default (io: Server) => {
 			}
 		);
 
-		socket.on(Events.CHANGE_PROGRESS, ({ progress, accuracy, wpm }) => {
-			users.set(socket.id, {
-				...users.get(socket.id),
-				progress,
-				accuracy,
-				wpm,
-			} as User);
+		socket.on(
+			Events.CHANGE_PROGRESS,
+			(data: { progress?: number; wpm: number; accuracy: number }) => {
+				users.set(socket.id, {
+					...users.get(socket.id),
+					...data,
+				} as User);
 
-			const roomName = getRoomName(socket);
+				const roomName = getRoomName(socket);
 
-			if (progress === 100) {
-				if (!roomProgress[roomName]) {
-					roomProgress[roomName] = new Set<string>();
+				if (data.progress === 100) {
+					if (!roomProgress[roomName]) {
+						roomProgress[roomName] = new Set<string>();
+					}
+					roomProgress[roomName].add(socket.id);
 				}
-				roomProgress[roomName].add(socket.id);
+				io.to(roomName).emit(Events.CHANGE_PROGRESS, {
+					...users.get(socket.id),
+				});
+				const roomUsers = getRoomUsers(io, roomName);
+				// If all users are finished, end the game
+				if (roomProgress[roomName].size === roomUsers?.size) {
+					endGame(io, socket, true);
+				}
 			}
-			io.to(roomName).emit(Events.CHANGE_PROGRESS, {
-				...users.get(socket.id),
-			});
-			const roomUsers = getRoomUsers(io, roomName);
-			// If all users are finished, end the game
-			if (roomProgress[roomName].size === roomUsers?.size) {
-				endGame(io, socket, true);
-			}
-		});
+		);
 
 		socket.on(Events.END_GAME, () => {
 			endGame(io, socket);
