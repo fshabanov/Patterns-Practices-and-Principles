@@ -24,21 +24,27 @@ export default (io: Server) => {
 		createRoom(io, socket);
 
 		socket.on(Events.JOIN_ROOM, (roomName) => {
-			if (getRoomUsers(io, roomName)?.has(socket.id)) return;
-			if (
-				(getRoomUsers(io, roomName)?.size || 0) >=
-				config.MAXIMUM_USERS_FOR_ONE_ROOM
-			) {
+			const roomUsers = getRoomUsers(io, roomName);
+			if (roomUsers?.has(socket.id)) return;
+			if ((roomUsers?.size || 0) >= config.MAXIMUM_USERS_FOR_ONE_ROOM) {
 				socket.emit(Events.ERROR, {
 					message: "Room is full",
 				});
 				return;
 			}
 			socket.join(roomName);
-			io.emit(Events.UPDATE_ROOMS, {
-				name: roomName,
-				numberOfUsers: getRoomUsers(io, roomName)?.size || 0,
-			});
+			roomUsers?.add(socket.id);
+			const numOfUsers = roomUsers?.size || 0;
+			if (numOfUsers >= config.MAXIMUM_USERS_FOR_ONE_ROOM) {
+				io.emit(Events.REMOVE_ROOM, {
+					name: roomName,
+				});
+			} else {
+				io.emit(Events.UPDATE_ROOMS, {
+					name: roomName,
+					numberOfUsers: roomUsers?.size || 0,
+				});
+			}
 			joinRoom(io, socket, roomName);
 		});
 

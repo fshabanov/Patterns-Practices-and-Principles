@@ -12,4 +12,15 @@ function setRooms(newRooms: string[]): void {
 	rooms = newRooms;
 }
 
-export { roomProgress, startedGameRooms, users, rooms, setRooms };
+const wasEndGameInfoSent: {
+	[roomName: string]: boolean;
+} = {};
+
+export {
+	roomProgress,
+	startedGameRooms,
+	users,
+	rooms,
+	setRooms,
+	wasEndGameInfoSent,
+};

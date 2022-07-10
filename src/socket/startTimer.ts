@@ -3,7 +3,12 @@ import { Events, User } from "../@types";
 import * as config from "./config";
 import data from "../data";
 import getRoomUsers from "../helpers/getRoomUsers";
-import { roomProgress, startedGameRooms, users } from "../state";
+import {
+	roomProgress,
+	startedGameRooms,
+	users,
+	wasEndGameInfoSent,
+} from "../state";
 
 function startTimer(io: Server, roomName: string): void {
 	const usersInRoom = getRoomUsers(io, roomName) as Set<string>;
@@ -12,6 +17,7 @@ function startTimer(io: Server, roomName: string): void {
 		Array.from(usersInRoom).every((user) => users.get(user)?.isReady) &&
 		!startedGameRooms.has(roomName)
 	) {
+		wasEndGameInfoSent[roomName] = false;
 		roomProgress[roomName] = new Set<string>();
 		startedGameRooms.add(roomName);
 		const roomUsers = getRoomUsers(io, roomName);

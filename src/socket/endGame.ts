@@ -4,7 +4,12 @@ import { Events, User } from "../@types";
 import getRoomName from "../helpers/getRoomName";
 import getRoomUsers from "../helpers/getRoomUsers";
 import shouldShowRoom from "../helpers/shouldShowRoom";
-import { roomProgress, startedGameRooms, users } from "../state";
+import {
+	roomProgress,
+	startedGameRooms,
+	users,
+	wasEndGameInfoSent,
+} from "../state";
 
 function endGame(
 	io: Server,
@@ -61,11 +66,13 @@ function endGame(
 		});
 	});
 
-	shouldShowRoom(io, roomName) &&
+	if (shouldShowRoom(io, roomName) && !wasEndGameInfoSent[roomName]) {
 		io.emit(Events.CREATE_ROOM, {
 			name: roomName,
 			numberOfUsers: getRoomUsers(io, roomName)?.size || 0,
 		});
+		wasEndGameInfoSent[roomName] = true;
+	}
 }
 
 export default endGame;
