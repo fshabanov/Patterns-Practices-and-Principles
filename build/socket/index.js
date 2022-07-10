@@ -42,21 +42,29 @@ exports.default = (io) => {
         (0, getAllRooms_1.default)(io, socket);
         (0, createRoom_1.default)(io, socket);
         socket.on(_types_1.Events.JOIN_ROOM, (roomName) => {
-            var _a, _b, _c;
-            if ((_a = (0, getRoomUsers_1.default)(io, roomName)) === null || _a === void 0 ? void 0 : _a.has(socket.id))
+            const roomUsers = (0, getRoomUsers_1.default)(io, roomName);
+            if (roomUsers === null || roomUsers === void 0 ? void 0 : roomUsers.has(socket.id))
                 return;
-            if ((((_b = (0, getRoomUsers_1.default)(io, roomName)) === null || _b === void 0 ? void 0 : _b.size) || 0) >=
-                config.MAXIMUM_USERS_FOR_ONE_ROOM) {
+            if (((roomUsers === null || roomUsers === void 0 ? void 0 : roomUsers.size) || 0) >= config.MAXIMUM_USERS_FOR_ONE_ROOM) {
                 socket.emit(_types_1.Events.ERROR, {
                     message: "Room is full",
                 });
                 return;
             }
             socket.join(roomName);
-            io.emit(_types_1.Events.UPDATE_ROOMS, {
-                name: roomName,
-                numberOfUsers: ((_c = (0, getRoomUsers_1.default)(io, roomName)) === null || _c === void 0 ? void 0 : _c.size) || 0,
-            });
+            roomUsers === null || roomUsers === void 0 ? void 0 : roomUsers.add(socket.id);
+            const numOfUsers = (roomUsers === null || roomUsers === void 0 ? void 0 : roomUsers.size) || 0;
+            if (numOfUsers >= config.MAXIMUM_USERS_FOR_ONE_ROOM) {
+                io.emit(_types_1.Events.REMOVE_ROOM, {
+                    name: roomName,
+                });
+            }
+            else {
+                io.emit(_types_1.Events.UPDATE_ROOMS, {
+                    name: roomName,
+                    numberOfUsers: (roomUsers === null || roomUsers === void 0 ? void 0 : roomUsers.size) || 0,
+                });
+            }
             (0, joinRoom_1.default)(io, socket, roomName);
         });
         socket.on(_types_1.Events.LEAVE_ROOM, (roomName) => {

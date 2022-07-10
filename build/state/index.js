@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setRooms = exports.rooms = exports.users = exports.startedGameRooms = exports.roomProgress = void 0;
+exports.wasEndGameInfoSent = exports.setRooms = exports.rooms = exports.users = exports.startedGameRooms = exports.roomProgress = void 0;
 const roomProgress = {};
 exports.roomProgress = roomProgress;
 const startedGameRooms = new Set();
@@ -13,3 +13,5 @@ function setRooms(newRooms) {
     exports.rooms = rooms = newRooms;
 }
 exports.setRooms = setRooms;
+const wasEndGameInfoSent = {};
+exports.wasEndGameInfoSent = wasEndGameInfoSent;

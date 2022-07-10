@@ -45,10 +45,12 @@ function endGame(io, socket, sendAll = false, customRoomName) {
         state_1.users.set(user, Object.assign(Object.assign({}, state_1.users.get(user)), { isReady: false, progress: 0 }));
         io.to(roomName).emit(_types_1.Events.USER_READY, Object.assign(Object.assign({}, state_1.users.get(user)), { isReady: false }));
     });
-    (0, shouldShowRoom_1.default)(io, roomName) &&
+    if ((0, shouldShowRoom_1.default)(io, roomName) && !state_1.wasEndGameInfoSent[roomName]) {
         io.emit(_types_1.Events.CREATE_ROOM, {
             name: roomName,
             numberOfUsers: ((_a = (0, getRoomUsers_1.default)(io, roomName)) === null || _a === void 0 ? void 0 : _a.size) || 0,
         });
+        state_1.wasEndGameInfoSent[roomName] = true;
+    }
 }
 exports.default = endGame;

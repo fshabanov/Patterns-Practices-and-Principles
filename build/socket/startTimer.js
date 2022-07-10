@@ -33,6 +33,7 @@ function startTimer(io, roomName) {
         return;
     if (Array.from(usersInRoom).every((user) => { var _a; return (_a = state_1.users.get(user)) === null || _a === void 0 ? void 0 : _a.isReady; }) &&
         !state_1.startedGameRooms.has(roomName)) {
+        state_1.wasEndGameInfoSent[roomName] = false;
         state_1.roomProgress[roomName] = new Set();
         state_1.startedGameRooms.add(roomName);
         const roomUsers = (0, getRoomUsers_1.default)(io, roomName);
