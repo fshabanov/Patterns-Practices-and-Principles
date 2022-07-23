@@ -72,3 +72,7 @@
 .finished {
 	background-color: greenyellow !important;
 }
+
+.commentator_wrapper {
+	margin: 20px;
+}

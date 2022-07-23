@@ -1,23 +1,24 @@
-import { Server } from "socket.io";
-import { Events, User } from "../@types";
-import { roomProgress, setRooms, users } from "../state";
-import getRoomName from "../helpers/getRoomName";
-import getRoomUsers from "../helpers/getRoomUsers";
-import * as config from "./config";
-import createRoom from "./createRoom";
-import endGame from "./endGame";
-import getAllRooms from "./getAllRooms";
-import joinRoom from "./joinRoom";
-import leaveRoom from "./leaveRoom";
-import startTimer from "./startTimer";
-import userReady from "./userReady";
-import connectUser from "./connectUser";
+import { Server } from 'socket.io';
+import { Events, User } from '../@types';
+import { roomProgress, setRooms, users } from '../state';
+import getRoomName from '../helpers/getRoomName';
+import getRoomUsers from '../helpers/getRoomUsers';
+import * as config from './config';
+import createRoom from './createRoom';
+import endGame from './endGame';
+import getAllRooms from './getAllRooms';
+import joinRoom from './joinRoom';
+import leaveRoom from './leaveRoom';
+import startTimer from './startTimer';
+import userReady from './userReady';
+import connectUser from './connectUser';
 
 export default (io: Server) => {
-	io.on("connection", (socket) => {
+	io.on('connection', (socket) => {
 		const username = socket.handshake.query.username as string;
+		const device = socket.handshake.query.device as string;
 
-		connectUser(io, socket, username);
+		connectUser(io, socket, username, device);
 
 		getAllRooms(io, socket);
 
@@ -28,7 +29,7 @@ export default (io: Server) => {
 			if (roomUsers?.has(socket.id)) return;
 			if ((roomUsers?.size || 0) >= config.MAXIMUM_USERS_FOR_ONE_ROOM) {
 				socket.emit(Events.ERROR, {
-					message: "Room is full",
+					message: 'Room is full',
 				});
 				return;
 			}
@@ -91,7 +92,7 @@ export default (io: Server) => {
 			endGame(io, socket);
 		});
 
-		socket.on("disconnecting", () => {
+		socket.on('disconnecting', () => {
 			const connectedRooms = Array.from(socket.rooms).slice(1);
 			connectedRooms.forEach((room) => {
 				setRooms(leaveRoom(io, socket, room));
@@ -100,7 +101,7 @@ export default (io: Server) => {
 			users.delete(socket.id);
 		});
 
-		socket.on("disconnect", () => {
+		socket.on('disconnect', () => {
 			console.log(`${username} disconnected`);
 			io.sockets.sockets.delete(username);
 		});

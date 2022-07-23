@@ -1,11 +1,12 @@
-import { Server, Socket } from "socket.io";
-import { Events, User } from "../@types";
-import { roomProgress, rooms, startedGameRooms, users } from "../state";
-import getRoomUsers from "../helpers/getRoomUsers";
-import shouldEndGameWhenLeave from "../helpers/shouldEndGameWhenLeave";
-import shouldShowRoom from "../helpers/shouldShowRoom";
-import endGame from "./endGame";
-import * as config from "./config";
+import { Socket } from 'socket.io';
+import { Server } from 'socket.io';
+import { Events, User } from '../@types';
+import { roomProgress, rooms, startedGameRooms, users } from '../state';
+import getRoomUsers from '../helpers/getRoomUsers';
+import shouldEndGameWhenLeave from '../helpers/shouldEndGameWhenLeave';
+import shouldShowRoom from '../helpers/shouldShowRoom';
+import endGame from './endGame';
+import * as config from './config';
 
 function leaveRoom(io: Server, socket: Socket, room: string): string[] {
 	socket.leave(room);

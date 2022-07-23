@@ -1,15 +1,15 @@
-import { Server } from "socket.io";
-import { Socket } from "socket.io";
-import { Events, User } from "../@types";
-import getRoomName from "../helpers/getRoomName";
-import getRoomUsers from "../helpers/getRoomUsers";
-import shouldShowRoom from "../helpers/shouldShowRoom";
+import { Socket } from 'socket.io';
+import { Server } from 'socket.io';
+import { Events, User } from '../@types';
+import getRoomName from '../helpers/getRoomName';
+import getRoomUsers from '../helpers/getRoomUsers';
+import shouldShowRoom from '../helpers/shouldShowRoom';
 import {
 	roomProgress,
 	startedGameRooms,
 	users,
 	wasEndGameInfoSent,
-} from "../state";
+} from '../state';
 
 function endGame(
 	io: Server,

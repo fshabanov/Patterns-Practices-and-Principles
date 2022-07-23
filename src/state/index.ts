@@ -1,4 +1,5 @@
-import { IRoomProgress, User } from "../@types";
+import { IRoomProgress, User } from '../@types';
+import { textGenerators } from './textGenerators';
 
 const roomProgress: IRoomProgress = {};
 
@@ -23,4 +24,5 @@ export {
 	rooms,
 	setRooms,
 	wasEndGameInfoSent,
+	textGenerators,
 };

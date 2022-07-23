@@ -1,7 +1,8 @@
-import { Server, Socket } from "socket.io";
-import { Events } from "../@types";
-import shouldShowRoom from "../helpers/shouldShowRoom";
-import { rooms } from "../state";
+import { Socket } from 'socket.io';
+import { Server } from 'socket.io';
+import { Events } from '../@types';
+import shouldShowRoom from '../helpers/shouldShowRoom';
+import { rooms } from '../state';
 
 function getAllRooms(io: Server, socket: Socket): void {
 	socket.emit(Events.GET_ALL_ROOMS, {

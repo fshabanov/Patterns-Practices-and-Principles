@@ -1,8 +1,8 @@
-import { Socket } from "socket.io";
-import { Server } from "socket.io";
-import { Events, User } from "../@types";
-import { users } from "../state";
-import startTimer from "./startTimer";
+import { Socket } from 'socket.io';
+import { Server } from 'socket.io';
+import { Events, User } from '../@types';
+import { users } from '../state';
+import startTimer from './startTimer';
 function userReady(
 	io: Server,
 	socket: Socket,
