@@ -36,16 +36,21 @@ class TextGenerator {
 		return `${user.username} has left the game!`;
 	}
 
-	reportStatus() {
+	reportStatus(roomUsers: Set<string>) {
 		const finishedUsers = roomProgress[this._roomName];
+		const roomUserData = [...roomUsers].map((user) => users.get(user) as User);
+		roomUserData.sort((a, b) => b.progress - a.progress);
+		const userOrderText = `The order of the players is:
+				${this._listUsers(roomUserData.filter((user) => user.progress !== 100))}`;
 		if (finishedUsers.size === 0) {
-			return `No one has finished the game yet!`;
+			return `No one has finished the game yet! ${userOrderText}`;
 		} else {
 			return `The following users have finished the game: ${Array.from(
 				finishedUsers.keys()
 			)
 				.map((socketId) => users.get(socketId)?.username)
-				.join(', ')}! Remaining - keep it up!`;
+				.join(', ')}! Remaining - keep it up!
+				${userOrderText}`;
 		}
 	}
 
@@ -69,7 +74,7 @@ class TextGenerator {
 		return randomTextData[Math.floor(Math.random() * randomTextData.length)];
 	}
 
-	_listUsers(users?: User[]) {
+	private _listUsers(users?: User[]) {
 		const toList = users && users.length ? users : [...this._userList];
 		return `${toList
 			.map(

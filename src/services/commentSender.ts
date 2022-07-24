@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import { User } from '../@types';
+import getRoomUsers from '../helpers/getRoomUsers';
 import { Commentator } from './commentator';
 import { TextGenerator } from './textGenerator';
 
@@ -61,7 +62,8 @@ class CommentSender {
 	}
 
 	reportStatus() {
-		const text = this._textGenerator.reportStatus();
+		const roomUsers = getRoomUsers(this._io, this._roomName);
+		const text = this._textGenerator.reportStatus(roomUsers as Set<string>);
 		this._commentator.sendComment(text);
 	}
 
