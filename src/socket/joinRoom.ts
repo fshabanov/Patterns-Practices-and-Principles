@@ -1,9 +1,9 @@
 import { Socket } from 'socket.io';
 import { Server } from 'socket.io';
 import { Events, User } from '../@types';
-import { joinRoomComment } from '../helpers/comments/comments';
 import getRoomUsers from '../helpers/getRoomUsers';
 import { users } from '../state';
+import { roomCommentators } from '../state/commentator';
 
 function joinRoom(io: Server, socket: Socket, roomName: string) {
 	const joinedUser = users.get(socket.id) as User;
@@ -20,7 +20,8 @@ function joinRoom(io: Server, socket: Socket, roomName: string) {
 			socketId: socket.id,
 		},
 	});
-	joinRoomComment(roomName, joinedUser);
+	const commentSender = roomCommentators[roomName];
+	commentSender.newUser(joinedUser);
 }
 
 export default joinRoom;

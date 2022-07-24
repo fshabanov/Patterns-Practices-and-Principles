@@ -1,7 +1,7 @@
-import { Commentator } from '../services/commentator';
+import { CommentSender } from '../services/commentSender';
 
 const roomCommentators: {
-	[roomName: string]: Commentator;
+	[roomName: string]: CommentSender;
 } = {};
 
 export { roomCommentators };

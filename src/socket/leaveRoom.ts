@@ -8,12 +8,12 @@ import shouldShowRoom from '../helpers/shouldShowRoom';
 import endGame from './endGame';
 import * as config from './config';
 import { roomCommentators } from '../state/commentator';
-import { leaveRoomComment } from '../helpers/comments/comments';
 
 function leaveRoom(io: Server, socket: Socket, room: string): string[] {
 	socket.leave(room);
 	roomProgress[room]?.delete(socket.id);
-	leaveRoomComment(room, users.get(socket.id) as User);
+	const commentSender = roomCommentators[room];
+	commentSender.leaveRoom(users.get(socket.id) as User);
 	if (shouldShowRoom(io, room)) {
 		const numOfUsers = getRoomUsers(io, room)?.size || 0;
 		// there were max num of people, one left

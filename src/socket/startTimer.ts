@@ -9,7 +9,7 @@ import {
 	users,
 	wasEndGameInfoSent,
 } from '../state';
-import { startGameComment } from '../helpers/comments/comments';
+import { roomCommentators } from '../state/commentator';
 
 function startTimer(io: Server, roomName: string): void {
 	const usersInRoom = getRoomUsers(io, roomName) as Set<string>;
@@ -33,7 +33,8 @@ function startTimer(io: Server, roomName: string): void {
 				progress: 0,
 			});
 		});
-		startGameComment(roomName);
+		const commentSender = roomCommentators[roomName];
+		commentSender.startGame();
 		// if all users are ready, start the game
 		io.to(roomName).emit(Events.START_GAME, {
 			timer: config.SECONDS_TIMER_BEFORE_START_GAME,

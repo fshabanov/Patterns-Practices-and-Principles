@@ -2,9 +2,8 @@ import { Socket } from 'socket.io';
 import { Server } from 'socket.io';
 import { Events, User } from '../@types';
 import getRoomUsers from '../helpers/getRoomUsers';
-import { Commentator } from '../services/commentator';
-import { TextGenerator } from '../services/textGenerator';
-import { rooms, textGenerators, users } from '../state';
+import { CommentSender } from '../services/commentSender';
+import { rooms } from '../state';
 import { roomCommentators } from '../state/commentator';
 import joinRoom from './joinRoom';
 
@@ -18,8 +17,7 @@ function createRoom(io: Server, socket: Socket): void {
 		}
 		rooms.push(roomName);
 		socket.join(roomName);
-		textGenerators[roomName] = new TextGenerator(roomName);
-		roomCommentators[roomName] = new Commentator(io, roomName);
+		roomCommentators[roomName] = new CommentSender(io, roomName);
 
 		io.emit(Events.CREATE_ROOM, {
 			name: roomName,

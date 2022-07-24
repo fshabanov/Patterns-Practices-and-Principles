@@ -1,11 +1,8 @@
 import { Socket } from 'socket.io';
 import { Server } from 'socket.io';
 import { Events, User } from '../@types';
-import {
-	userNotReadyComment,
-	userReadyComment,
-} from '../helpers/comments/comments';
 import { users } from '../state';
+import { roomCommentators } from '../state/commentator';
 import startTimer from './startTimer';
 function userReady(
 	io: Server,
@@ -18,10 +15,11 @@ function userReady(
 		...user,
 		isReady: isReady,
 	});
+	const commentSender = roomCommentators[roomName];
 	if (isReady) {
-		userReadyComment(roomName, user);
+		commentSender.userReady(user);
 	} else {
-		userNotReadyComment(roomName, user);
+		commentSender.userNotReady(user);
 	}
 	io.to(roomName).emit(Events.USER_READY, {
 		...users.get(socket.id),

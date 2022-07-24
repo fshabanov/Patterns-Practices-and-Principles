@@ -12,12 +12,7 @@ import leaveRoom from './leaveRoom';
 import startTimer from './startTimer';
 import userReady from './userReady';
 import connectUser from './connectUser';
-import {
-	randomDataComment,
-	reportStatusComment,
-	userFinishedComment,
-	userNearComment,
-} from '../helpers/comments/comments';
+import { roomCommentators } from '../state/commentator';
 
 export default (io: Server) => {
 	io.on('connection', (socket) => {
@@ -88,7 +83,8 @@ export default (io: Server) => {
 						roomProgress[roomName] = new Map<string, number>();
 					}
 					roomProgress[roomName].set(socket.id, data.timeUsed);
-					userFinishedComment(roomName, user);
+					const commentSender = roomCommentators[roomName];
+					commentSender.userFinished(user);
 				}
 				io.to(roomName).emit(Events.CHANGE_PROGRESS, {
 					...user,
@@ -103,18 +99,21 @@ export default (io: Server) => {
 
 		socket.on(Events.REPORT_STATUS, () => {
 			const roomName = getRoomName(socket);
-			reportStatusComment(roomName);
+			const commentSender = roomCommentators[roomName];
+			commentSender.reportStatus();
 		});
 
 		socket.on(Events.USER_NEAR, () => {
 			const roomName = getRoomName(socket);
 			const user = users.get(socket.id) as User;
-			userNearComment(roomName, user);
+			const commentSender = roomCommentators[roomName];
+			commentSender.userNear(user);
 		});
 
 		socket.on(Events.RANDOM_DATA, () => {
 			const roomName = getRoomName(socket);
-			randomDataComment(roomName);
+			const commentSender = roomCommentators[roomName];
+			commentSender.randomText();
 		});
 
 		socket.on(Events.END_GAME, () => {

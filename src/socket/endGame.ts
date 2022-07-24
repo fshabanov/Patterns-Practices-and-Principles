@@ -9,7 +9,7 @@ import {
 	users,
 	wasEndGameInfoSent,
 } from '../state';
-import { endGameComment } from '../helpers/comments/comments';
+import { roomCommentators } from '../state/commentator';
 
 function endGame(
 	io: Server,
@@ -36,7 +36,8 @@ function endGame(
 			.map((socketId) => users.get(socketId[0]) as User)
 			.concat(toAdd);
 
-		endGameComment(roomName, userOrder);
+		const commentSender = roomCommentators[roomName];
+		commentSender.endGame(userOrder);
 
 		if (sendAll) {
 			io.to(roomName).emit(Events.END_GAME, {

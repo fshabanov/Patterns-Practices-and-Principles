@@ -1,4 +1,4 @@
-import { randomTextData } from './randomTextData';
+import { randomTextData } from '../randomTextData';
 import { User } from '../@types';
 import { roomProgress, users } from '../state';
 
