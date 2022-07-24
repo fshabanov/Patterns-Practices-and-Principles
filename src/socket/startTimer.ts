@@ -1,14 +1,15 @@
-import { Server } from "socket.io";
-import { Events, User } from "../@types";
-import * as config from "./config";
-import data from "../data";
-import getRoomUsers from "../helpers/getRoomUsers";
+import { Server } from 'socket.io';
+import { Events, User } from '../@types';
+import * as config from './config';
+import data from '../data';
+import getRoomUsers from '../helpers/getRoomUsers';
 import {
 	roomProgress,
 	startedGameRooms,
 	users,
 	wasEndGameInfoSent,
-} from "../state";
+} from '../state';
+import { startGameComment } from '../helpers/comments/comments';
 
 function startTimer(io: Server, roomName: string): void {
 	const usersInRoom = getRoomUsers(io, roomName) as Set<string>;
@@ -18,7 +19,7 @@ function startTimer(io: Server, roomName: string): void {
 		!startedGameRooms.has(roomName)
 	) {
 		wasEndGameInfoSent[roomName] = false;
-		roomProgress[roomName] = new Set<string>();
+		roomProgress[roomName] = new Map<string, number>();
 		startedGameRooms.add(roomName);
 		const roomUsers = getRoomUsers(io, roomName);
 		roomUsers?.forEach((user) => {
@@ -32,6 +33,7 @@ function startTimer(io: Server, roomName: string): void {
 				progress: 0,
 			});
 		});
+		startGameComment(roomName);
 		// if all users are ready, start the game
 		io.to(roomName).emit(Events.START_GAME, {
 			timer: config.SECONDS_TIMER_BEFORE_START_GAME,

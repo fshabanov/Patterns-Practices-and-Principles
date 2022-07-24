@@ -1,5 +1,4 @@
-import { Socket } from 'socket.io';
-import { Server } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { Events, User } from '../@types';
 import getRoomName from '../helpers/getRoomName';
 import getRoomUsers from '../helpers/getRoomUsers';
@@ -10,6 +9,7 @@ import {
 	users,
 	wasEndGameInfoSent,
 } from '../state';
+import { endGameComment } from '../helpers/comments/comments';
 
 function endGame(
 	io: Server,
@@ -33,8 +33,10 @@ function endGame(
 				: b.progress - a.progress;
 		});
 		let userOrder = Array.from(roomProgress[roomName])
-			.map((socketId) => users.get(socketId))
+			.map((socketId) => users.get(socketId[0]) as User)
 			.concat(toAdd);
+
+		endGameComment(roomName, userOrder);
 
 		if (sendAll) {
 			io.to(roomName).emit(Events.END_GAME, {

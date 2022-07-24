@@ -7,10 +7,13 @@ import shouldEndGameWhenLeave from '../helpers/shouldEndGameWhenLeave';
 import shouldShowRoom from '../helpers/shouldShowRoom';
 import endGame from './endGame';
 import * as config from './config';
+import { roomCommentators } from '../state/commentator';
+import { leaveRoomComment } from '../helpers/comments/comments';
 
 function leaveRoom(io: Server, socket: Socket, room: string): string[] {
 	socket.leave(room);
 	roomProgress[room]?.delete(socket.id);
+	leaveRoomComment(room, users.get(socket.id) as User);
 	if (shouldShowRoom(io, room)) {
 		const numOfUsers = getRoomUsers(io, room)?.size || 0;
 		// there were max num of people, one left
@@ -34,6 +37,7 @@ function leaveRoom(io: Server, socket: Socket, room: string): string[] {
 			name: room,
 		});
 		startedGameRooms.delete(room);
+		delete roomCommentators[room];
 		return rooms.filter((r) => r !== room);
 	}
 	io.to(room).emit(Events.LEAVE_ROOM, {

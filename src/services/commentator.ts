@@ -1,5 +1,8 @@
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { Events } from '../@types';
+
+// Singleton principle
+
 class Commentator {
 	_io: Server;
 	_roomName: string;

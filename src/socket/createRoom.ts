@@ -3,7 +3,7 @@ import { Server } from 'socket.io';
 import { Events, User } from '../@types';
 import getRoomUsers from '../helpers/getRoomUsers';
 import { Commentator } from '../services/commentator';
-import { TextGenerator } from '../services/TextGenerator';
+import { TextGenerator } from '../services/textGenerator';
 import { rooms, textGenerators, users } from '../state';
 import { roomCommentators } from '../state/commentator';
 import joinRoom from './joinRoom';
@@ -18,9 +18,7 @@ function createRoom(io: Server, socket: Socket): void {
 		}
 		rooms.push(roomName);
 		socket.join(roomName);
-		textGenerators[roomName] = new TextGenerator([
-			users.get(socket.id) as User,
-		]);
+		textGenerators[roomName] = new TextGenerator(roomName);
 		roomCommentators[roomName] = new Commentator(io, roomName);
 
 		io.emit(Events.CREATE_ROOM, {

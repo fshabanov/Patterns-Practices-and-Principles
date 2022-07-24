@@ -12,6 +12,12 @@ import leaveRoom from './leaveRoom';
 import startTimer from './startTimer';
 import userReady from './userReady';
 import connectUser from './connectUser';
+import {
+	randomDataComment,
+	reportStatusComment,
+	userFinishedComment,
+	userNearComment,
+} from '../helpers/comments/comments';
 
 export default (io: Server) => {
 	io.on('connection', (socket) => {
@@ -63,22 +69,29 @@ export default (io: Server) => {
 
 		socket.on(
 			Events.CHANGE_PROGRESS,
-			(data: { progress?: number; wpm: number; accuracy: number }) => {
+			(data: {
+				progress?: number;
+				wpm: number;
+				accuracy: number;
+				timeUsed: number;
+			}) => {
+				const user = users.get(socket.id) as User;
 				users.set(socket.id, {
-					...users.get(socket.id),
+					...user,
 					...data,
-				} as User);
+				});
 
 				const roomName = getRoomName(socket);
 
 				if (data.progress === 100) {
 					if (!roomProgress[roomName]) {
-						roomProgress[roomName] = new Set<string>();
+						roomProgress[roomName] = new Map<string, number>();
 					}
-					roomProgress[roomName].add(socket.id);
+					roomProgress[roomName].set(socket.id, data.timeUsed);
+					userFinishedComment(roomName, user);
 				}
 				io.to(roomName).emit(Events.CHANGE_PROGRESS, {
-					...users.get(socket.id),
+					...user,
 				});
 				const roomUsers = getRoomUsers(io, roomName);
 				// If all users are finished, end the game
@@ -87,6 +100,22 @@ export default (io: Server) => {
 				}
 			}
 		);
+
+		socket.on(Events.REPORT_STATUS, () => {
+			const roomName = getRoomName(socket);
+			reportStatusComment(roomName);
+		});
+
+		socket.on(Events.USER_NEAR, () => {
+			const roomName = getRoomName(socket);
+			const user = users.get(socket.id) as User;
+			userNearComment(roomName, user);
+		});
+
+		socket.on(Events.RANDOM_DATA, () => {
+			const roomName = getRoomName(socket);
+			randomDataComment(roomName);
+		});
 
 		socket.on(Events.END_GAME, () => {
 			endGame(io, socket);

@@ -1,11 +1,11 @@
 export const texts = [
-  "Text for typing #1",
-  "Text for typing #2",
-  "Text for typing #3",
-  "Text for typing #4",
-  "Text for typing #5",
-  "Text for typing #6",
-  "Text for typing #7",
+	'Non pariatur id quis sunt eiusmod et reprehenderit sint enim sit enim eiusmod eu ex.',
+	'Aliqua et proident sunt mollit deserunt officia sint sit proident.',
+	'Duis nisi voluptate nostrud culpa culpa aliqua magna.',
+	'Qui do dolore commodo irure aute fugiat anim cupidatat quis fugiat ipsum cupidatat eu.',
+	'Lorem velit non deserunt enim nostrud do ad consequat minim eiusmod eu laborum.',
+	'Aute elit exercitation ipsum mollit aliqua ut veniam non commodo deserunt ipsum in Lorem cillum.',
+	'Sit Lorem velit commodo id consectetur officia tempor consectetur excepteur exercitation culpa consequat anim.',
 ];
 
 export default { texts };

@@ -2,8 +2,9 @@ let wpm = 0;
 let accuracy = 0;
 let mistakes = 0;
 let currentLetterIdx = 0;
-let randomText = "";
+let randomText = '';
 let wrongIndices = [];
+let timeUsed = 0;
 
 function setWpm(newWpm) {
 	wpm = newWpm;
@@ -29,6 +30,10 @@ function setWrongIndices(newWrongIndices) {
 	wrongIndices = newWrongIndices;
 }
 
+function setTimeUsed(newTimeUsed) {
+	timeUsed = newTimeUsed;
+}
+
 export {
 	wpm,
 	setWpm,
@@ -42,4 +47,6 @@ export {
 	setRandomText,
 	wrongIndices,
 	setWrongIndices,
+	timeUsed,
+	setTimeUsed,
 };

@@ -12,6 +12,9 @@ enum Events {
 	CHANGE_PROGRESS = 'CHANGE_PROGRESS',
 	END_GAME = 'END_GAME',
 	SEND_COMMENT = 'SEND_COMMENT',
+	REPORT_STATUS = 'REPORT_STATUS',
+	USER_NEAR = 'USER_NEAR',
+	RANDOM_DATA = 'RANDOM_DATA',
 }
 
 interface User {
@@ -25,7 +28,20 @@ interface User {
 }
 
 interface IRoomProgress {
-	[key: string]: Set<string>;
+	[key: string]: Map<string, number>;
 }
 
-export { Events, User, IRoomProgress };
+enum CommentType {
+	START_GAME,
+	END_GAME,
+	USER_READY,
+	USER_NOT_READY,
+	REPORT_STATUS,
+	JOIN_ROOM,
+	LEAVE_ROOM,
+	USER_NEAR,
+	USER_FINISHED,
+	RANDOM_DATA,
+}
+
+export { Events, User, IRoomProgress, CommentType };
