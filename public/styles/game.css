@@ -75,4 +75,20 @@
 
 .commentator_wrapper {
 	margin: 20px;
+	width: 20vw;
+}
+
+#commentator::after {
+	content: '';
+	width: 3px;
+	height: 20px;
+	background-color: black;
+	animation: cursor-blink 1.5s steps(2) infinite;
+	display: inline-block;
+}
+
+@keyframes cursor-blink {
+	0% {
+		opacity: 0;
+	}
 }

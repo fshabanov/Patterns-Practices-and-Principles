@@ -32,6 +32,21 @@ export const removeClass = (element, className) => {
 export const formatClassNames = (className) =>
 	className.split(' ').filter(Boolean);
 
+let timeouts = [];
+
 export const updateInnerText = (element, innerText) => {
-	element.innerText = innerText;
+	element.textContent = '';
+	timeouts.forEach((timeout) => clearTimeout(timeout));
+	// clearing an array without creating a new instance
+	timeouts.length = 0;
+	// Self invoking function
+	(function myLoop() {
+		for (let i = 0; i < innerText.length; i++) {
+			let timeout = setTimeout(() => {
+				element.textContent += innerText[i];
+				if (i === innerText.length) clearTimeout(timeout);
+			}, 50 * (i + 1));
+			timeouts.push(timeout);
+		}
+	})();
 };
