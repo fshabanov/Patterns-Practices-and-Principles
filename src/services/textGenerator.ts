@@ -1,6 +1,7 @@
 import { randomTextData } from '../randomTextData';
 import { User } from '../@types';
 import { roomProgress, users } from '../state';
+import * as config from '../socket/config';
 
 class TextGenerator {
 	_userList: Set<User>;
@@ -20,7 +21,7 @@ class TextGenerator {
 
 	endGame(userList: User[]) {
 		return `The game has ended! Here is the list of the winners:
-			${this._listUsers(userList.slice(0, 3))}
+			${this._listUsers(userList.slice(0, 3), true)}
 			Thanks for playing!`;
 	}
 
@@ -74,12 +75,17 @@ class TextGenerator {
 		return randomTextData[Math.floor(Math.random() * randomTextData.length)];
 	}
 
-	private _listUsers(users?: User[]) {
+	private _listUsers(users?: User[], showTime?: boolean) {
 		const toList = users && users.length ? users : [...this._userList];
 		return `${toList
 			.map(
 				(user, idx) =>
-					`${idx + 1}) ${user.username} - using their ${user.device} device`
+					`${idx + 1}) ${user.username} - using their ${user.device} device ${
+						showTime &&
+						'spending ' +
+							(user.timeUsed || config.SECONDS_FOR_GAME) +
+							' seconds'
+					}`
 			)
 			.join('\n')}`;
 	}

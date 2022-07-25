@@ -25,6 +25,7 @@ interface User {
 	accuracy: number;
 	wpm: number;
 	socketId: string;
+	timeUsed?: number;
 }
 
 interface IRoomProgress {
