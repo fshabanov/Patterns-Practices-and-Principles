@@ -1,29 +1,29 @@
 import { Socket } from 'socket.io';
-import { Server } from 'socket.io';
-import { Events, User } from '../@types';
+import { Events } from '../@types';
 import getRoomUsers from '../helpers/getRoomUsers';
 import { CommentSender } from '../services/commentSender';
-import { rooms } from '../state';
-import { roomCommentators } from '../state/commentator';
+import { state } from '../state/state';
 import joinRoom from './joinRoom';
 
-function createRoom(io: Server, socket: Socket): void {
+function createRoom(socket: Socket): void {
 	socket.on(Events.CREATE_ROOM, (roomName: string) => {
-		if (io.sockets.adapter.rooms.has(roomName)) {
+		if (state.io.sockets.adapter.rooms.has(roomName)) {
 			socket.emit(Events.ERROR, {
 				message: 'Room with this name already exists',
 			});
 			return;
 		}
-		rooms.push(roomName);
+		state.rooms.push(roomName);
 		socket.join(roomName);
-		roomCommentators[roomName] = new CommentSender(io, roomName);
+		if (!state.getRoomCommentator(roomName)) {
+			state.setRoomCommentators(roomName, new CommentSender(roomName));
+		}
 
-		io.emit(Events.CREATE_ROOM, {
+		state.io.emit(Events.CREATE_ROOM, {
 			name: roomName,
-			numberOfUsers: getRoomUsers(io, roomName)?.size || 0,
+			numberOfUsers: getRoomUsers(roomName)?.size || 0,
 		});
-		joinRoom(io, socket, roomName);
+		joinRoom(socket, roomName);
 	});
 }
 

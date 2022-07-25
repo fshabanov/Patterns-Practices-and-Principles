@@ -1,29 +1,22 @@
-import { Socket, Server } from 'socket.io';
+import { Socket } from 'socket.io';
 import { Events, User } from '../@types';
 import getRoomName from '../helpers/getRoomName';
 import getRoomUsers from '../helpers/getRoomUsers';
 import shouldShowRoom from '../helpers/shouldShowRoom';
-import {
-	roomProgress,
-	startedGameRooms,
-	users,
-	wasEndGameInfoSent,
-} from '../state';
-import { roomCommentators } from '../state/commentator';
+import { state } from '../state/state';
 
 function endGame(
-	io: Server,
 	socket: Socket,
 	sendAll = false,
 	customRoomName?: string
 ): void {
 	const roomName = customRoomName ? customRoomName : getRoomName(socket);
-	const roomUsers = getRoomUsers(io, roomName);
+	const roomUsers = getRoomUsers(roomName);
 	if (roomUsers) {
 		const toAdd: User[] = [];
 		roomUsers.forEach((user) => {
-			const userInfo = users.get(user);
-			if (!roomProgress[roomName]?.has(user)) {
+			const userInfo = state.users.get(user);
+			if (!state.roomProgress[roomName]?.has(user)) {
 				toAdd.push(userInfo as User);
 			}
 		});
@@ -32,15 +25,15 @@ function endGame(
 				? b.accuracy - a.accuracy
 				: b.progress - a.progress;
 		});
-		let userOrder = Array.from(roomProgress[roomName])
-			.map((socketId) => users.get(socketId[0]) as User)
+		let userOrder = Array.from(state.roomProgress[roomName])
+			.map((socketId) => state.users.get(socketId[0]) as User)
 			.concat(toAdd);
 
-		const commentSender = roomCommentators[roomName];
+		const commentSender = state.getRoomCommentator(roomName);
 		commentSender.endGame(userOrder);
 
 		if (sendAll) {
-			io.to(roomName).emit(Events.END_GAME, {
+			state.io.to(roomName).emit(Events.END_GAME, {
 				userOrder: userOrder.filter((usr) =>
 					roomUsers.has(usr?.socketId as string)
 				),
@@ -54,27 +47,27 @@ function endGame(
 		}
 	}
 
-	startedGameRooms.delete(roomName);
+	state.startedGameRooms.delete(roomName);
 
 	roomUsers?.forEach((user) => {
-		users.set(user, {
-			...users.get(user),
+		state.users.set(user, {
+			...state.users.get(user),
 			isReady: false,
 			progress: 0,
 		} as User);
 
-		io.to(roomName).emit(Events.USER_READY, {
-			...users.get(user),
+		state.io.to(roomName).emit(Events.USER_READY, {
+			...state.users.get(user),
 			isReady: false,
 		});
 	});
 
-	if (shouldShowRoom(io, roomName) && !wasEndGameInfoSent[roomName]) {
-		io.emit(Events.CREATE_ROOM, {
+	if (shouldShowRoom(roomName) && !state.wasEndGameInfoSent[roomName]) {
+		state.io.emit(Events.CREATE_ROOM, {
 			name: roomName,
-			numberOfUsers: getRoomUsers(io, roomName)?.size || 0,
+			numberOfUsers: getRoomUsers(roomName)?.size || 0,
 		});
-		wasEndGameInfoSent[roomName] = true;
+		state.setWasEndGameInfoSent(roomName, true);
 	}
 }
 

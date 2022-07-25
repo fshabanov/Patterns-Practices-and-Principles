@@ -1,6 +1,5 @@
 import { Server } from 'socket.io';
 import { Events, User } from '../@types';
-import { roomProgress, setRooms, users } from '../state';
 import getRoomName from '../helpers/getRoomName';
 import getRoomUsers from '../helpers/getRoomUsers';
 import * as config from './config';
@@ -12,21 +11,22 @@ import leaveRoom from './leaveRoom';
 import startTimer from './startTimer';
 import userReady from './userReady';
 import connectUser from './connectUser';
-import { roomCommentators } from '../state/commentator';
+import { state } from '../state/state';
 
 export default (io: Server) => {
+	state.io = io;
 	io.on('connection', (socket) => {
 		const username = socket.handshake.query.username as string;
 		const device = socket.handshake.query.device as string;
 
-		connectUser(io, socket, username, device);
+		connectUser(socket, username, device);
 
-		getAllRooms(io, socket);
+		getAllRooms(socket);
 
-		createRoom(io, socket);
+		createRoom(socket);
 
 		socket.on(Events.JOIN_ROOM, (roomName) => {
-			const roomUsers = getRoomUsers(io, roomName);
+			const roomUsers = getRoomUsers(roomName);
 			if (roomUsers?.has(socket.id)) return;
 			if ((roomUsers?.size || 0) >= config.MAXIMUM_USERS_FOR_ONE_ROOM) {
 				socket.emit(Events.ERROR, {
@@ -47,18 +47,18 @@ export default (io: Server) => {
 					numberOfUsers: roomUsers?.size || 0,
 				});
 			}
-			joinRoom(io, socket, roomName);
+			joinRoom(socket, roomName);
 		});
 
 		socket.on(Events.LEAVE_ROOM, (roomName) => {
-			setRooms(leaveRoom(io, socket, roomName));
-			startTimer(io, roomName);
+			state.rooms = leaveRoom(socket, roomName);
+			startTimer(roomName);
 		});
 
 		socket.on(
 			Events.USER_READY,
 			(data: { roomName: string; isReady: boolean }): void => {
-				userReady(io, socket, data.isReady, data.roomName);
+				userReady(socket, data.isReady, data.roomName);
 			}
 		);
 
@@ -70,8 +70,8 @@ export default (io: Server) => {
 				accuracy: number;
 				timeUsed: number;
 			}) => {
-				const user = users.get(socket.id) as User;
-				users.set(socket.id, {
+				const user = state.users.get(socket.id) as User;
+				state.users.set(socket.id, {
 					...user,
 					...data,
 				});
@@ -79,54 +79,54 @@ export default (io: Server) => {
 				const roomName = getRoomName(socket);
 
 				if (data.progress === 100) {
-					if (!roomProgress[roomName]) {
-						roomProgress[roomName] = new Map<string, number>();
+					if (!state.roomProgress[roomName]) {
+						state.roomProgress[roomName] = new Map<string, number>();
 					}
-					roomProgress[roomName].set(socket.id, data.timeUsed);
-					const commentSender = roomCommentators[roomName];
+					state.roomProgress[roomName].set(socket.id, data.timeUsed);
+					const commentSender = state.getRoomCommentator(roomName);
 					commentSender.userFinished(user);
 				}
 				io.to(roomName).emit(Events.CHANGE_PROGRESS, {
 					...user,
 				});
-				const roomUsers = getRoomUsers(io, roomName);
+				const roomUsers = getRoomUsers(roomName);
 				// If all users are finished, end the game
-				if (roomProgress[roomName].size === roomUsers?.size) {
-					endGame(io, socket, true);
+				if (state.roomProgress[roomName].size === roomUsers?.size) {
+					endGame(socket, true);
 				}
 			}
 		);
 
 		socket.on(Events.REPORT_STATUS, () => {
 			const roomName = getRoomName(socket);
-			const commentSender = roomCommentators[roomName];
+			const commentSender = state.getRoomCommentator(roomName);
 			commentSender.reportStatus();
 		});
 
 		socket.on(Events.USER_NEAR, () => {
 			const roomName = getRoomName(socket);
-			const user = users.get(socket.id) as User;
-			const commentSender = roomCommentators[roomName];
+			const user = state.users.get(socket.id) as User;
+			const commentSender = state.getRoomCommentator(roomName);
 			commentSender.userNear(user);
 		});
 
 		socket.on(Events.RANDOM_DATA, () => {
 			const roomName = getRoomName(socket);
-			const commentSender = roomCommentators[roomName];
-			commentSender.randomText();
+			const commentSender = state.getRoomCommentator(roomName);
+			commentSender?.randomText();
 		});
 
 		socket.on(Events.END_GAME, () => {
-			endGame(io, socket);
+			endGame(socket);
 		});
 
 		socket.on('disconnecting', () => {
 			const connectedRooms = Array.from(socket.rooms).slice(1);
 			connectedRooms.forEach((room) => {
-				setRooms(leaveRoom(io, socket, room));
-				startTimer(io, room);
+				state.rooms = leaveRoom(socket, room);
+				startTimer(room);
 			});
-			users.delete(socket.id);
+			state.users.delete(socket.id);
 		});
 
 		socket.on('disconnect', () => {

@@ -1,11 +1,12 @@
 import { Server } from 'socket.io';
 import { Events } from '../@types';
+import { state } from '../state/state';
 
 class Commentator {
 	_io: Server;
 	_roomName: string;
-	constructor(io: Server, roomName: string) {
-		this._io = io;
+	constructor(roomName: string) {
+		this._io = state.io;
 		this._roomName = roomName;
 	}
 

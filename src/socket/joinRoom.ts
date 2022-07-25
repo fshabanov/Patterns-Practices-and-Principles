@@ -1,26 +1,22 @@
 import { Socket } from 'socket.io';
-import { Server } from 'socket.io';
 import { Events, User } from '../@types';
 import getRoomUsers from '../helpers/getRoomUsers';
-import { users } from '../state';
-import { roomCommentators } from '../state/commentator';
+import { state } from '../state/state';
 
-function joinRoom(io: Server, socket: Socket, roomName: string) {
-	const joinedUser = users.get(socket.id) as User;
-	io.to(roomName).emit(Events.JOIN_ROOM, {
+function joinRoom(socket: Socket, roomName: string) {
+	const joinedUser = state.users.get(socket.id) as User;
+	state.io.to(roomName).emit(Events.JOIN_ROOM, {
 		name: roomName,
-		users: Array.from(getRoomUsers(io, roomName) as Set<string>).map(
-			(user) => ({
-				...users.get(user),
-				isCurrentUser: user === socket.id,
-			})
-		),
+		users: Array.from(getRoomUsers(roomName) as Set<string>).map((user) => ({
+			...state.users.get(user),
+			isCurrentUser: user === socket.id,
+		})),
 		newUser: {
 			...joinedUser,
 			socketId: socket.id,
 		},
 	});
-	const commentSender = roomCommentators[roomName];
+	const commentSender = state.getRoomCommentator(roomName);
 	commentSender.newUser(joinedUser);
 }
 

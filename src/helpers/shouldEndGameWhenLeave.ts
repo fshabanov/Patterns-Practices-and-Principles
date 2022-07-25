@@ -1,12 +1,11 @@
-import { Server } from "socket.io";
-import { users } from "../state";
-import getRoomUsers from "./getRoomUsers";
+import { state } from '../state/state';
+import getRoomUsers from './getRoomUsers';
 
-function shouldEndGameWhenLeave(io: Server, roomName: string): boolean {
-	const roomUsers = getRoomUsers(io, roomName);
+function shouldEndGameWhenLeave(roomName: string): boolean {
+	const roomUsers = getRoomUsers(roomName);
 	if (roomUsers) {
 		for (let user of Array.from(roomUsers)) {
-			let foundUser = users.get(user);
+			let foundUser = state.users.get(user);
 			if (foundUser && foundUser?.progress < 100) {
 				return false;
 			}

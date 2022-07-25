@@ -1,7 +1,7 @@
 import { randomTextData } from '../randomTextData';
 import { User } from '../@types';
-import { roomProgress, users } from '../state';
 import * as config from '../socket/config';
+import { state } from '../state/state';
 
 class TextGenerator {
 	_userList: Set<User>;
@@ -38,10 +38,12 @@ class TextGenerator {
 	}
 
 	reportStatus(roomUsers: Set<string>) {
-		const finishedUsers = roomProgress[this._roomName];
-		const roomUserData = [...roomUsers].map((user) => users.get(user) as User);
+		const finishedUsers = state.roomProgress[this._roomName];
+		const roomUserData = [...roomUsers].map(
+			(user) => state.users.get(user) as User
+		);
 		roomUserData.sort((a, b) => b.progress - a.progress);
-		const userOrderText = `The order of the players is:
+		const userOrderText = `The order of the remaining players is:
 				${this._listUsers(roomUserData.filter((user) => user.progress !== 100))}`;
 		if (finishedUsers.size === 0) {
 			return `No one has finished the game yet! ${userOrderText}`;
@@ -49,7 +51,7 @@ class TextGenerator {
 			return `The following users have finished the game: ${Array.from(
 				finishedUsers.keys()
 			)
-				.map((socketId) => users.get(socketId)?.username)
+				.map((socketId) => state.users.get(socketId)?.username)
 				.join(', ')}! Remaining - keep it up!
 				${userOrderText}`;
 		}
@@ -81,10 +83,11 @@ class TextGenerator {
 			.map(
 				(user, idx) =>
 					`${idx + 1}) ${user.username} - using their ${user.device} device ${
-						showTime &&
-						'spending ' +
-							(user.timeUsed || config.SECONDS_FOR_GAME) +
-							' seconds'
+						(showTime &&
+							'spending ' +
+								(user.timeUsed || config.SECONDS_FOR_GAME) +
+								' seconds') ||
+						''
 					}`
 			)
 			.join('\n')}`;

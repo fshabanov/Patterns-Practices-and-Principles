@@ -10,7 +10,11 @@ function startGame() {
 	let seconds = 0;
 	let interval = setInterval(() => {
 		seconds++;
-		if ((seconds === 1 || seconds % 10 === 0) && seconds % 30 !== 0) {
+		if (
+			(seconds === 1 || seconds % 10 === 0) &&
+			seconds % 30 !== 0 &&
+			seconds !== 0
+		) {
 			socket.emit('RANDOM_DATA');
 		}
 		if (seconds % 30 === 0) {

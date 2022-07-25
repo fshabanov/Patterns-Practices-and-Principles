@@ -1,52 +1,52 @@
 import { Socket } from 'socket.io';
-import { Server } from 'socket.io';
 import { Events, User } from '../@types';
-import { roomProgress, rooms, startedGameRooms, users } from '../state';
 import getRoomUsers from '../helpers/getRoomUsers';
 import shouldEndGameWhenLeave from '../helpers/shouldEndGameWhenLeave';
 import shouldShowRoom from '../helpers/shouldShowRoom';
 import endGame from './endGame';
 import * as config from './config';
-import { roomCommentators } from '../state/commentator';
+import { state } from '../state/state';
 
-function leaveRoom(io: Server, socket: Socket, room: string): string[] {
+function leaveRoom(socket: Socket, room: string): string[] {
 	socket.leave(room);
-	roomProgress[room]?.delete(socket.id);
-	const commentSender = roomCommentators[room];
-	commentSender.leaveRoom(users.get(socket.id) as User);
-	if (shouldShowRoom(io, room)) {
-		const numOfUsers = getRoomUsers(io, room)?.size || 0;
+	state.roomProgress[room]?.delete(socket.id);
+	const commentSender = state.getRoomCommentator(room);
+	commentSender.leaveRoom(state.users.get(socket.id) as User);
+	if (shouldShowRoom(room)) {
+		const numOfUsers = getRoomUsers(room)?.size || 0;
 		// there were max num of people, one left
 		if (numOfUsers === config.MAXIMUM_USERS_FOR_ONE_ROOM - 1) {
-			io.emit(Events.CREATE_ROOM, {
+			state.io.emit(Events.CREATE_ROOM, {
 				name: room,
 				numberOfUsers: numOfUsers,
 			});
 		} else {
-			io.emit(Events.UPDATE_ROOMS, {
+			state.io.emit(Events.UPDATE_ROOMS, {
 				name: room,
-				numberOfUsers: getRoomUsers(io, room)?.size || 0,
+				numberOfUsers: getRoomUsers(room)?.size || 0,
 			});
 		}
 	}
 
-	users.set(socket.id, { ...users.get(socket.id), isReady: false } as User);
-	if (!getRoomUsers(io, room)?.size) {
-		io.sockets.adapter.rooms.delete(room);
-		io.emit(Events.REMOVE_ROOM, {
+	state.users.set(socket.id, {
+		...state.users.get(socket.id),
+		isReady: false,
+	} as User);
+	if (!getRoomUsers(room)?.size) {
+		state.io.sockets.adapter.rooms.delete(room);
+		state.io.emit(Events.REMOVE_ROOM, {
 			name: room,
 		});
-		startedGameRooms.delete(room);
-		delete roomCommentators[room];
-		return rooms.filter((r) => r !== room);
+		state.startedGameRooms.delete(room);
+		return state.rooms.filter((r) => r !== room);
 	}
-	io.to(room).emit(Events.LEAVE_ROOM, {
-		...users.get(socket.id),
+	state.io.to(room).emit(Events.LEAVE_ROOM, {
+		...state.users.get(socket.id),
 	});
-	if (shouldEndGameWhenLeave(io, room)) {
-		endGame(io, socket, true, room);
+	if (shouldEndGameWhenLeave(room)) {
+		endGame(socket, true, room);
 	}
-	return rooms;
+	return state.rooms;
 }
 
 export default leaveRoom;

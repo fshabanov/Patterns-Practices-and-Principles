@@ -1,4 +1,3 @@
-import { Server } from 'socket.io';
 import { User } from '../@types';
 import getRoomUsers from '../helpers/getRoomUsers';
 import { Commentator } from './commentator';
@@ -8,19 +7,17 @@ import { TextGenerator } from './textGenerator';
 
 class CommentSender {
 	_roomName: string;
-	_io: Server;
 	_commentator: Commentator;
 	_textGenerator: TextGenerator;
-	constructor(io: Server, roomName: string) {
+	constructor(roomName: string) {
 		this._roomName = roomName;
-		this._io = io;
 		[this._commentator, this._textGenerator] = this.createInstance();
 	}
 
 	createInstance() {
 		// Singleton pattern
 		if (!this._commentator) {
-			this._commentator = new Commentator(this._io, this._roomName);
+			this._commentator = new Commentator(this._roomName);
 		}
 		if (!this._textGenerator) {
 			this._textGenerator = new TextGenerator(this._roomName);
@@ -62,7 +59,7 @@ class CommentSender {
 	}
 
 	reportStatus() {
-		const roomUsers = getRoomUsers(this._io, this._roomName);
+		const roomUsers = getRoomUsers(this._roomName);
 		const text = this._textGenerator.reportStatus(roomUsers as Set<string>);
 		this._commentator.sendComment(text);
 	}
