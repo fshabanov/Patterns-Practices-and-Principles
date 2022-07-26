@@ -45,7 +45,7 @@ export const updateInnerText = (element, innerText) => {
 			let timeout = setTimeout(() => {
 				element.textContent += innerText[i];
 				if (i === innerText.length) clearTimeout(timeout);
-			}, 50 * (i + 1));
+			}, 30 * (i + 1));
 			timeouts.push(timeout);
 		}
 	})();

@@ -21,7 +21,7 @@ class TextGenerator {
 
 	endGame(userList: User[]) {
 		return `The game has ended! Here is the list of the winners:
-			${this._listUsers(userList.slice(0, 3), true)}
+			${this._listUsers(userList.slice(0, 3), { showTime: true })}
 			Thanks for playing!`;
 	}
 
@@ -44,7 +44,10 @@ class TextGenerator {
 		);
 		roomUserData.sort((a, b) => b.progress - a.progress);
 		const userOrderText = `The order of the remaining players is:
-				${this._listUsers(roomUserData.filter((user) => user.progress !== 100))}`;
+				${this._listUsers(
+					roomUserData.filter((user) => user.progress !== 100),
+					{ showProgress: true }
+				)}`;
 		if (finishedUsers.size === 0) {
 			return `No one has finished the game yet! ${userOrderText}`;
 		} else {
@@ -77,7 +80,10 @@ class TextGenerator {
 		return randomTextData[Math.floor(Math.random() * randomTextData.length)];
 	}
 
-	private _listUsers(users?: User[], showTime?: boolean) {
+	private _listUsers(
+		users?: User[],
+		{ showTime = false, showProgress = false } = {}
+	) {
 		const toList = users && users.length ? users : [...this._userList];
 		return `${toList
 			.map(
@@ -87,6 +93,10 @@ class TextGenerator {
 							'spending ' +
 								(user.timeUsed || config.SECONDS_FOR_GAME) +
 								' seconds') ||
+						''
+					} ${
+						(showProgress &&
+							'completing ' + user.progress.toFixed(2) + '% of the game') ||
 						''
 					}`
 			)
